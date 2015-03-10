@@ -37,6 +37,9 @@ echo -e "[\t\t\t\t\t\t\t]"
 echo -e "[\t\t** DISCLAIMER **\t\t\t]"
 echo -e "[\tThis software is provided \"as is\" without\t]"
 echo -e "[\twarranty of any kind. Use at your own risk.\t]"
+echo -e "[\t\t\t\t\t\t\t]"
+echo -e "[\tLogs and error messages are saved in\t\t]"
+echo -e "[\t/var/log/Observium_<errors/script>.log\t\t]"
 echo -e "========================================================="
 read -n1 -p 'Press any key to continue or Ctrl+C to exit...'
 

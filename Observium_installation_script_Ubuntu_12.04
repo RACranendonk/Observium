@@ -12,7 +12,8 @@ NC='\e[0m' # No Color
 
 error_file="/var/log/observium_errors.log"
 log_file="/var/log/observium_script.log"
-date >> $error_file
+date > $error_file
+date > $log_file
 errors="Error messages:"
 
 function quit {
@@ -50,14 +51,14 @@ observium_admin_def_pw="observium_admin_password"
 
 # Update system
 echo -en "${green}Updating system...${NC}"
-add-apt-repository -y ppa:ondrej/php5-oldstable 2> $error_file > $log_file
+add-apt-repository -y ppa:ondrej/php5-oldstable 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- Adding PHP5 repo failed."
 	quit
 fi
 
-apt-get update 2> $error_file > $log_file
-DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confnew" -y upgrade 2> $error_file > $log_file
+apt-get update 2>> $error_file >> $log_file
+DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confnew" -y upgrade 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- Upgrading failed."
 	quit
@@ -68,7 +69,7 @@ echo -e "\t\t\t\t\t${green}[OK]${NC}"
 echo -en "${green}Installing Observium prerequisites...${NC}"
 debconf-set-selections <<< "mysql-server mysql-server/root_password password $mysql_def_pw"
 debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $mysql_def_pw"
-apt-get -y install libapache2-mod-php5 php5 php5-cli php5-mysql php5-gd php5-mcrypt php5-json php-pear snmp fping mysql-server mysql-client python-mysqldb rrdtool subversion whois mtr-tiny ipmitool graphviz imagemagick 2> $error_file > $log_file
+apt-get -y install libapache2-mod-php5 php5 php5-cli php5-mysql php5-gd php5-mcrypt php5-json php-pear snmp fping mysql-server mysql-client python-mysqldb rrdtool subversion whois mtr-tiny ipmitool graphviz imagemagick 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- Installing packages failed."
 	quit
@@ -77,7 +78,7 @@ echo -e "\t\t\t${green}[OK]${NC}"
 
 # Make directories for Observium
 echo -en "${green}Creating directories for Observium in /opt...${NC}"
-mkdir -p /opt/observium 2> $error_file > $log_file
+mkdir -p /opt/observium 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- Creating directory /opt/observium failed."
 	quit
@@ -87,7 +88,7 @@ echo -e "\t\t${green}[OK]${NC}"
 
 # Download latest observium
 echo -en "${green}Downloading latest Observium version...${NC}"
-wget http://www.observium.org/observium-community-latest.tar.gz 2> $error_file > $log_file
+wget http://www.observium.org/observium-community-latest.tar.gz 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- Downloading observium failed."
 	quit
@@ -96,7 +97,7 @@ echo -e "\t\t\t${green}[OK]${NC}"
 
 # Unpack downloaded package
 echo -en "${green}Unpacking...${NC}"
-tar -zxvf observium-community-latest.tar.gz 2> $error_file > $log_file
+tar -zxvf observium-community-latest.tar.gz 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- Unpacking failed."
 	quit
@@ -107,9 +108,9 @@ echo -e "\t\t\t\t\t\t${green}[OK]${NC}"
 
 # Initializing default config
 echo -en "${green}Initializing default configuration...${NC}"
-cp config.php.default config.php 2> $error_file > $log_file
-sed -i "s/USERNAME/$observium_mysql_def_user/" /opt/observium/config.php 2> $error_file > $log_file
-sed -i "s/PASSWORD/$observium_mysql_def_pw/" /opt/observium/config.php 2> $error_file > $log_file
+cp config.php.default config.php 2>> $error_file >> $log_file
+sed -i "s/USERNAME/$observium_mysql_def_user/" /opt/observium/config.php 2>> $error_file >> $log_file
+sed -i "s/PASSWORD/$observium_mysql_def_pw/" /opt/observium/config.php 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- Initialization of config file failed."
 	quit
@@ -128,7 +129,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Setup the default schema
-php includes/update/update.php 2> $error_file > $log_file
+php includes/update/update.php 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- Creating default schema failed."
 	quit
@@ -137,9 +138,9 @@ echo -e "\t${green}[OK]${NC}"
 
 # Create log and rrd folders
 echo -en "${green}Creating logs and RRD folders for Observium...${NC}"
-mkdir -p logs 2> $error_file > $log_file
-mkdir -p rrd 2> $error_file > $log_file
-chown www-data:www-data rrd 2> $error_file > $log_file
+mkdir -p logs 2>> $error_file >> $log_file
+mkdir -p rrd 2>> $error_file >> $log_file
+chown www-data:www-data rrd 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- Changing owner of RRD folder failed."
 	quit
@@ -148,7 +149,7 @@ echo -e "\t\t${green}[OK]${NC}"
 
 # Config apache
 echo -en "${green}Creating apache config...${NC}"
-rm /etc/apache2/sites-available/default 2> $error_file > $log_file
+rm /etc/apache2/sites-available/default 2>> $error_file >> $log_file
 cat > /etc/apache2/sites-available/default << EOF
 <VirtualHost *:80>
        ServerAdmin webmaster@localhost
@@ -173,7 +174,7 @@ if [ $? -ne 0 ]; then
 	errors="$errors \n- Creating apache config failed."
 	quit
 fi
-chown user:user /etc/apache2/sites-available/default 2> $error_file > $log_file
+chown user:user /etc/apache2/sites-available/default 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- Changing owner of Apache config failed."
 	quit
@@ -182,19 +183,19 @@ echo -e "\t\t\t\t${green}[OK]${NC}"
 
 # Starting services
 echo -en "${green}Starting services...${NC}"
-php5enmod mcrypt 2> $error_file > $log_file
+php5enmod mcrypt 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- Starting php5enmod mcrypt failed."
 	quit
 fi
 
-a2enmod rewrite 2> $error_file > $log_file
+a2enmod rewrite 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- Rewriting a2enmod failed."
 	quit
 fi
 
-apache2ctl restart 2> $error_file > $log_file
+apache2ctl restart 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- Restarting apache2ctl failed."
 	quit
@@ -203,7 +204,7 @@ echo -e "\t\t\t\t\t${green}[OK]${NC}"
 
 # Add user to observium
 echo -en "${green}Adding admin user to Observium...${NC}"
-./adduser.php admin $observium_admin_def_pw 10 2> $error_file > $log_file
+./adduser.php admin $observium_admin_def_pw 10 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- Adding admin user failed."
 	quit
@@ -213,9 +214,9 @@ echo -e "\t\t\t${green}[OK]${NC}"
 # Create CRONjobs
 echo -en "${green}Creating CRON jobs...${NC}"
 cat > /etc/cron.d/observium << EOF
-33  */6   * * *   root    /opt/observium/discovery.php -h all >> /dev/null 2>&1
-*/5 *     * * *   root    /opt/observium/discovery.php -h new >> /dev/null 2>&1
-*/5 *     * * *   root    /opt/observium/poller-wrapper.py 2 >> /dev/null 2>&1
+33  */6   * * *   root    /opt/observium/discovery.php -h all >> /dev/null 2>>&1
+*/5 *     * * *   root    /opt/observium/discovery.php -h new >> /dev/null 2>>&1
+*/5 *     * * *   root    /opt/observium/poller-wrapper.py 2 >> /dev/null 2>>&1
 EOF
 if [ $? -ne 0 ]; then
 	errors="$errors \n- Creating CRON jobs failed."
@@ -225,12 +226,12 @@ echo -e "\t\t\t\t\t${green}[OK]${NC}"
 
 # Run poller and discovery
 echo -en "${green}Running initial discovery and poller...${NC}"
-./discovery.php -h all 2> $error_file > $log_file
+./discovery.php -h all 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- Running discovery failed."
 	quit
 fi
-./poller.php -h all 2> $error_file > $log_file
+./poller.php -h all 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- Running poller failed."
 	quit

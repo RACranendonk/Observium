@@ -174,7 +174,8 @@ if [ $? -ne 0 ]; then
 	errors="$errors \n- Creating apache config failed."
 	quit
 fi
-chown user:user /etc/apache2/sites-available/default 2>> $error_file >> $log_file
+
+chmod  root:root /etc/apache2/sites-available/default 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- Changing owner of Apache config failed."
 	quit

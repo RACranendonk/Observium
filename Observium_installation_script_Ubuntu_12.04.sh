@@ -51,6 +51,7 @@ observium_admin_def_pw="observium_admin_password"
 
 # Update system
 echo -en "${green}Updating system...${NC}"
+apt-get install software-properties-common python-software-properties
 add-apt-repository -y ppa:ondrej/php5-oldstable 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- At line $LINENO: Adding PHP5 repo failed."

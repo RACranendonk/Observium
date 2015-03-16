@@ -12,6 +12,8 @@ NC='\e[0m' # No Color
 
 error_file="/var/log/observium_errors.log"
 log_file="/var/log/observium_script.log"
+observium_file_name="observium-community-latest.tar.gz"
+url="http://www.observium.org/$observium_file_name"
 date > $error_file
 date > $log_file
 errors="Error messages:"
@@ -51,7 +53,7 @@ observium_admin_def_pw="observium_admin_password"
 
 # Update system
 echo -en "${green}Updating system...${NC}"
-apt-get install software-properties-common python-software-properties
+apt-get install software-properties-common python-software-properties 2>> $error_file >> $log_file
 add-apt-repository -y ppa:ondrej/php5-oldstable 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- At line $LINENO: Adding PHP5 repo failed."
@@ -59,11 +61,6 @@ if [ $? -ne 0 ]; then
 fi
 
 apt-get update 2>> $error_file >> $log_file
-if [ $? -ne 0 ]; then
-	errors="$errors \n- At line $LINENO: update failed, maybe run 'rm -rf /var/lib/apt/lists/*'."
-	quit
-fi
-
 DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confnew" -y upgrade 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- At line $LINENO: Upgrading failed."
@@ -93,13 +90,14 @@ cd /opt
 echo -e "\t\t${green}[OK]${NC}"
 
 # Download latest observium
-echo -en "${green}Downloading latest Observium version...${NC}"
-wget -nv "http://www.observium.org/observium-community-latest.tar.gz" 2>> $error_file >> $log_file
-if [ $? -ne 0 ]; then
+echo -e "${green}Downloading latest Observium version...${NC}"
+wget --progress=dot $url 2>&1 | grep --line-buffered -o "[0-9]*%"|xargs -L1 echo -en "\r";echo
+
+if [ ! -f $filename ]; then
 	errors="$errors \n- At line $LINENO: Downloading Observium failed."
 	quit
 fi
-echo -e "\t\t\t${green}[OK]${NC}"
+echo -e "\r${green}[OK]${NC}"
 
 # Unpack downloaded package
 echo -en "${green}Unpacking...${NC}"
@@ -155,7 +153,7 @@ echo -e "\t\t${green}[OK]${NC}"
 
 # Config apache
 echo -en "${green}Creating apache config...${NC}"
-rm /etc/apache2/sites-available/default 2>> $error_file >> $log_file
+rm -f /etc/apache2/sites-available/default 2>> $error_file >> $log_file
 cat > /etc/apache2/sites-available/default << EOF
 <VirtualHost *:80>
        ServerAdmin webmaster@localhost

@@ -8,3 +8,9 @@ Refer to the code or the [Observium installation guide](http://www.observium.org
 ## Setup
 
 Make the script executable by using `sudo chmod +x <script>`, and execute with `sudo ./<script>`
+
+## Troubleshooting
+
+Error messages are stored in `/var/log/observium_errors.log`.
+
+Script output is stored in `/var/log/observium_script.log`.

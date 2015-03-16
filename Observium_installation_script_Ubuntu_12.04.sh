@@ -51,7 +51,6 @@ observium_admin_def_pw="observium_admin_password"
 
 # Update system
 echo -en "${green}Updating system...${NC}"
-rm -rf /var/lib/apt/lists/*
 apt-get install software-properties-common python-software-properties
 add-apt-repository -y ppa:ondrej/php5-oldstable 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
@@ -60,6 +59,11 @@ if [ $? -ne 0 ]; then
 fi
 
 apt-get update 2>> $error_file >> $log_file
+if [ $? -ne 0 ]; then
+	errors="$errors \n- At line $LINENO: update failed, maybe run 'rm -rf /var/lib/apt/lists/*'."
+	quit
+fi
+
 DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confnew" -y upgrade 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- At line $LINENO: Upgrading failed."
@@ -240,3 +244,4 @@ echo -e "${red}Please change the following passwords ASAP:${NC}"
 echo -e "MySQL Root login: root // $mysql_def_pw"
 echo -e "Observium MySQL login: observium // $observium_mysql_def_pw"
 echo -e "Observium webapp admin login: admin // $observium_admin_def_pw"
+echo -e "Go to GitHub.com/RACranendonk/Observium for a how-to guide."

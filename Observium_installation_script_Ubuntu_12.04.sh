@@ -91,13 +91,13 @@ echo -e "\t\t${green}[OK]${NC}"
 
 # Download latest observium
 echo -e "${green}Downloading latest Observium version...${NC}"
-wget --progress=dot $url 2>&1 | grep --line-buffered -o "[0-9]*%"|xargs -L1 echo -en "\r";echo
+wget --progress=dot $url 2>&1 | grep --line-buffered -o "[0-9]*%"|xargs -L1 echo -en "\r";echo -n
 
 if [ ! -f $observium_file_name ]; then
 	errors="$errors \n- At line $LINENO: Downloading Observium failed."
 	quit
 fi
-echo -e "\r${green}[OK]${NC}"
+echo -e "\r${green}[OK]  ${NC}"
 
 # Unpack downloaded package
 echo -en "${green}Unpacking...${NC}"

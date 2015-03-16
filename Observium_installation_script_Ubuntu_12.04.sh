@@ -18,8 +18,8 @@ errors="Error messages:"
 
 function quit {
 	echo -e "$errors\n" >> $error_file
-	echo -e "${red}Fatal error encountered. Error messages saved to $error_file.${NC}"
-	echo -e $errors
+	echo -e "\n${red}Fatal error encountered. Error messages saved to $error_file.${NC}"
+	echo -e $errors 
 	echo -e "${red}Exiting...${NC}"
 	exit 1
 }
@@ -53,14 +53,14 @@ observium_admin_def_pw="observium_admin_password"
 echo -en "${green}Updating system...${NC}"
 add-apt-repository -y ppa:ondrej/php5-oldstable 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
-	errors="$errors \n- Adding PHP5 repo failed."
+	errors="$errors \n- At line $LINENO: Adding PHP5 repo failed."
 	quit
 fi
 
 apt-get update 2>> $error_file >> $log_file
 DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confnew" -y upgrade 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
-	errors="$errors \n- Upgrading failed."
+	errors="$errors \n- At line $LINENO: Upgrading failed."
 	quit
 fi
 echo -e "\t\t\t\t\t${green}[OK]${NC}"
@@ -71,7 +71,7 @@ debconf-set-selections <<< "mysql-server mysql-server/root_password password $my
 debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $mysql_def_pw"
 apt-get -y install libapache2-mod-php5 php5 php5-cli php5-mysql php5-gd php5-mcrypt php5-json php-pear snmp fping mysql-server mysql-client python-mysqldb rrdtool subversion whois mtr-tiny ipmitool graphviz imagemagick 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
-	errors="$errors \n- Installing packages failed."
+	errors="$errors \n- At line $LINENO: Installing packages failed."
 	quit
 fi
 echo -e "\t\t\t${green}[OK]${NC}"
@@ -80,7 +80,7 @@ echo -e "\t\t\t${green}[OK]${NC}"
 echo -en "${green}Creating directories for Observium in /opt...${NC}"
 mkdir -p /opt/observium 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
-	errors="$errors \n- Creating directory /opt/observium failed."
+	errors="$errors \n- At line $LINENO: Creating directory /opt/observium failed."
 	quit
 fi
 cd /opt
@@ -88,9 +88,9 @@ echo -e "\t\t${green}[OK]${NC}"
 
 # Download latest observium
 echo -en "${green}Downloading latest Observium version...${NC}"
-wget http://www.observium.org/observium-community-latest.tar.gz 2>> $error_file >> $log_file
+wget -nv "http://www.observium.org/observium-community-latest.tar.gz" 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
-	errors="$errors \n- Downloading observium failed."
+	errors="$errors \n- At line $LINENO: Downloading Observium failed."
 	quit
 fi
 echo -e "\t\t\t${green}[OK]${NC}"
@@ -99,7 +99,7 @@ echo -e "\t\t\t${green}[OK]${NC}"
 echo -en "${green}Unpacking...${NC}"
 tar -zxvf observium-community-latest.tar.gz 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
-	errors="$errors \n- Unpacking failed."
+	errors="$errors \n- At line $LINENO: Unpacking failed."
 	quit
 fi
 
@@ -112,7 +112,7 @@ cp config.php.default config.php 2>> $error_file >> $log_file
 sed -i "s/USERNAME/$observium_mysql_def_user/" /opt/observium/config.php 2>> $error_file >> $log_file
 sed -i "s/PASSWORD/$observium_mysql_def_pw/" /opt/observium/config.php 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
-	errors="$errors \n- Initialization of config file failed."
+	errors="$errors \n- At line $LINENO: Initialization of config file failed."
 	quit
 fi
 echo -e "\t\t\t${green}[OK]${NC}"
@@ -124,14 +124,14 @@ CREATE DATABASE IF NOT EXISTS observium DEFAULT CHARACTER SET utf8 COLLATE utf8_
 GRANT ALL PRIVILEGES ON observium.* TO '$observium_mysql_def_user'@'localhost' IDENTIFIED BY '$observium_mysql_def_pw';
 EOF
 if [ $? -ne 0 ]; then
-	errors="$errors \n- Initializing MySQL database failed."
+	errors="$errors \n- At line $LINENO: Initializing MySQL database failed."
 	quit
 fi
 
 # Setup the default schema
 php includes/update/update.php 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
-	errors="$errors \n- Creating default schema failed."
+	errors="$errors \n- At line $LINENO: Creating default schema failed."
 	quit
 fi
 echo -e "\t${green}[OK]${NC}"
@@ -142,7 +142,7 @@ mkdir -p logs 2>> $error_file >> $log_file
 mkdir -p rrd 2>> $error_file >> $log_file
 chown www-data:www-data rrd 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
-	errors="$errors \n- Changing owner of RRD folder failed."
+	errors="$errors \n- At line $LINENO: Changing owner of RRD folder failed."
 	quit
 fi
 echo -e "\t\t${green}[OK]${NC}"
@@ -171,7 +171,7 @@ cat > /etc/apache2/sites-available/default << EOF
 </VirtualHost>
 EOF
 if [ $? -ne 0 ]; then
-	errors="$errors \n- Creating apache config failed."
+	errors="$errors \n- At line $LINENO: Creating apache config failed."
 	quit
 fi
 echo -e "\t\t\t\t${green}[OK]${NC}"
@@ -180,19 +180,19 @@ echo -e "\t\t\t\t${green}[OK]${NC}"
 echo -en "${green}Starting services...${NC}"
 php5enmod mcrypt 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
-	errors="$errors \n- Starting php5enmod mcrypt failed."
+	errors="$errors \n- At line $LINENO: Starting php5enmod mcrypt failed."
 	quit
 fi
 
 a2enmod rewrite 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
-	errors="$errors \n- Rewriting a2enmod failed."
+	errors="$errors \n- At line $LINENO: Rewriting a2enmod failed."
 	quit
 fi
 
 apache2ctl restart 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
-	errors="$errors \n- Restarting apache2ctl failed."
+	errors="$errors \n- At line $LINENO: Restarting apache2ctl failed."
 	quit
 fi
 echo -e "\t\t\t\t\t${green}[OK]${NC}"
@@ -201,7 +201,7 @@ echo -e "\t\t\t\t\t${green}[OK]${NC}"
 echo -en "${green}Adding admin user to Observium...${NC}"
 ./adduser.php admin $observium_admin_def_pw 10 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
-	errors="$errors \n- Adding admin user failed."
+	errors="$errors \n- At line $LINENO: Adding admin user failed."
 	quit
 fi
 echo -e "\t\t\t${green}[OK]${NC}"
@@ -214,7 +214,7 @@ cat > /etc/cron.d/observium << EOF
 */5 *     * * *   root    /opt/observium/poller-wrapper.py 2 >> /dev/null 2>>&1
 EOF
 if [ $? -ne 0 ]; then
-	errors="$errors \n- Creating CRON jobs failed."
+	errors="$errors \n- At line $LINENO: Creating CRON jobs failed."
 	quit
 fi
 echo -e "\t\t\t\t\t${green}[OK]${NC}"
@@ -223,12 +223,12 @@ echo -e "\t\t\t\t\t${green}[OK]${NC}"
 echo -en "${green}Running initial discovery and poller...${NC}"
 ./discovery.php -h all 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
-	errors="$errors \n- Running discovery failed."
+	errors="$errors \n- At line $LINENO: Running discovery failed."
 	quit
 fi
 ./poller.php -h all 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
-	errors="$errors \n- Running poller failed."
+	errors="$errors \n- At line $LINENO: Running poller failed."
 	quit
 fi
 echo -e "\t\t\t${green}[OK]${NC}"

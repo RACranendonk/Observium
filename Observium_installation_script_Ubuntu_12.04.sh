@@ -93,7 +93,7 @@ echo -e "\t\t${green}[OK]${NC}"
 echo -e "${green}Downloading latest Observium version...${NC}"
 wget --progress=dot $url 2>&1 | grep --line-buffered -o "[0-9]*%"|xargs -L1 echo -en "\r";echo
 
-if [ ! -f $filename ]; then
+if [ ! -f $observium_file_name ]; then
 	errors="$errors \n- At line $LINENO: Downloading Observium failed."
 	quit
 fi

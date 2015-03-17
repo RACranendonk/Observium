@@ -14,6 +14,7 @@ error_file="/var/log/observium_errors.log"
 log_file="/var/log/observium_script.log"
 observium_file_name="observium-community-latest.tar.gz"
 url="http://www.observium.org/$observium_file_name"
+version=$(lsb_release -s -r)
 date > $error_file
 date > $log_file
 errors="Error messages:"
@@ -154,19 +155,20 @@ echo -e "\t\t${green}[OK]${NC}"
 # Config apache
 echo -en "${green}Creating apache config...${NC}"
 rm -f /etc/apache2/sites-available/default 2>> $error_file >> $log_file
+if [ $version = 12.04 ]; then
 cat > /etc/apache2/sites-available/default << EOF
 <VirtualHost *:80>
        ServerAdmin webmaster@localhost
        DocumentRoot /opt/observium/html
        <Directory />
-               Options FollowSymLinks
-               AllowOverride None
+	       Options FollowSymLinks
+	       AllowOverride None
        </Directory>
        <Directory /opt/observium/html/>
-               Options Indexes FollowSymLinks MultiViews
-               AllowOverride All
-               Order allow,deny
-               allow from all
+	       Options Indexes FollowSymLinks MultiViews
+	       AllowOverride All
+	       Order allow,deny
+	       allow from all
        </Directory>
        ErrorLog  ${APACHE_LOG_DIR}/error.log
        LogLevel warn
@@ -179,6 +181,36 @@ if [ $? -ne 0 ]; then
 	quit
 fi
 echo -e "\t\t\t\t${green}[OK]${NC}"
+
+elif [ $version = 14.04 ]; then
+cat > /etc/apache2/sites-available/default << EOF
+<VirtualHost *:80>
+       	ServerAdmin webmaster@localhost
+       	DocumentRoot /opt/observium/html
+       	<Directory />
+	       	Options FollowSymLinks
+	       	AllowOverride None
+       	</Directory>
+	<Directory /opt/observium/html/>
+	      Options Indexes FollowSymLinks MultiViews
+	      AllowOverride All
+	      Require all granted
+	</Directory>
+       	ErrorLog  ${APACHE_LOG_DIR}/error.log
+       	LogLevel warn
+       	CustomLog  ${APACHE_LOG_DIR}/access.log combined
+       	ServerSignature On
+</VirtualHost>
+EOF
+if [ $? -ne 0 ]; then
+	errors="$errors \n- At line $LINENO: Creating apache config failed."
+	quit
+fi
+echo -e "\t\t\t\t${green}[OK]${NC}"
+else
+	errors="$errors \n- At line $LINENO: Could not determine release version"
+	quit
+fi
 
 # Starting services
 echo -en "${green}Starting services...${NC}"

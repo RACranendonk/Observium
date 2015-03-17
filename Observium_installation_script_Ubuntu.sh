@@ -31,7 +31,7 @@ clear
 echo -e "========================================================="
 echo -e "[\t${green}Observium installation script${NC}\t\t\t]"
 echo -e "[\tCreated by Robert Cranendonk - March 2015\t]"
-echo -e "[\tDesigned for Ubuntu 12.04 LTS\t\t\t]"
+echo -e "[\tDesigned for Ubuntu 12.04 and 14.04\t\t\t]"
 echo -e "[\t\t\t\t\t\t\t]"
 echo -e "[\tThis program will install and configure\t\t]"
 echo -e "[\tObservium on your system. Installation will\t]"

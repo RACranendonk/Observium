@@ -55,7 +55,7 @@ observium_admin_def_pw="observium_admin_password"
 # Update system
 echo -en "${green}Updating system...${NC}"
 apt-get install -y software-properties-common python-software-properties 2>> $error_file >> $log_file
-add-apt-repository -y ppa:ondrej/php5-oldstable 2>> $error_file >> $log_file
+add-apt-repository -y ppa:ondrej/php5 2>> $error_file >> $log_file
 if [ $? -ne 0 ]; then
 	errors="$errors \n- At line $LINENO: Adding PHP5 repo failed."
 	quit
@@ -154,35 +154,6 @@ echo -e "\t\t${green}[OK]${NC}"
 
 # Config apache
 echo -en "${green}Creating apache config...${NC}"
-if [ $version = 12.04 ]; then
-rm -f /etc/apache2/sites-available/default 2>> $error_file >> $log_file
-cat > /etc/apache2/sites-available/default << EOF
-<VirtualHost *:80>
-       ServerAdmin webmaster@localhost
-       DocumentRoot /opt/observium/html
-       <Directory />
-	       Options FollowSymLinks
-	       AllowOverride None
-       </Directory>
-       <Directory /opt/observium/html/>
-	       Options Indexes FollowSymLinks MultiViews
-	       AllowOverride All
-	       Order allow,deny
-	       allow from all
-       </Directory>
-       ErrorLog  ${APACHE_LOG_DIR}/error.log
-       LogLevel warn
-       CustomLog  ${APACHE_LOG_DIR}/access.log combined
-       ServerSignature On
-</VirtualHost>
-EOF
-if [ $? -ne 0 ]; then
-	errors="$errors \n- At line $LINENO: Creating apache config failed."
-	quit
-fi
-echo -e "\t\t\t\t${green}[OK]${NC}"
-
-elif [ $version = 14.04 ]; then
 rm -f /etc/apache2/sites-available/000-default.conf 2>> $error_file >> $log_file
 cat > /etc/apache2/sites-available/000-default.conf << EOF
 <VirtualHost *:80>
@@ -208,10 +179,6 @@ if [ $? -ne 0 ]; then
 	quit
 fi
 echo -e "\t\t\t\t${green}[OK]${NC}"
-else
-	errors="$errors \n- At line $LINENO: Could not determine release version"
-	quit
-fi
 
 # Starting services
 echo -en "${green}Starting services...${NC}"

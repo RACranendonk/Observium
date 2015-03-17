@@ -154,8 +154,8 @@ echo -e "\t\t${green}[OK]${NC}"
 
 # Config apache
 echo -en "${green}Creating apache config...${NC}"
-rm -f /etc/apache2/sites-available/default 2>> $error_file >> $log_file
 if [ $version = 12.04 ]; then
+rm -f /etc/apache2/sites-available/default 2>> $error_file >> $log_file
 cat > /etc/apache2/sites-available/default << EOF
 <VirtualHost *:80>
        ServerAdmin webmaster@localhost
@@ -183,7 +183,8 @@ fi
 echo -e "\t\t\t\t${green}[OK]${NC}"
 
 elif [ $version = 14.04 ]; then
-cat > /etc/apache2/sites-available/default << EOF
+rm -f /etc/apache2/sites-available/000-default.conf 2>> $error_file >> $log_file
+cat > /etc/apache2/sites-available/000-default.conf << EOF
 <VirtualHost *:80>
        	ServerAdmin webmaster@localhost
        	DocumentRoot /opt/observium/html

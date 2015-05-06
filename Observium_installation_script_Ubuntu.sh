@@ -221,6 +221,7 @@ if [ $? -ne 0 ]; then
 	errors="$errors \n- At line $LINENO: Creating CRON jobs failed."
 	quit
 fi
+service cron reload
 echo -e "\t\t\t\t\t${green}[OK]${NC}"
 
 # Run poller and discovery

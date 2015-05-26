@@ -213,9 +213,9 @@ echo -e "\t\t\t${green}[OK]${NC}"
 # Create CRONjobs
 echo -en "${green}Creating CRON jobs...${NC}"
 cat > /etc/cron.d/observium << EOF
-33 */6 * * * root /opt/observium/discovery.php -h all >> /dev/null 2>>&1
-*/5 * * * * root /opt/observium/discovery.php -h new >> /dev/null 2>>&1
-*/5 * * * * root /opt/observium/poller-wrapper.py 2 >> /dev/null 2>>&1
+33 */6 * * * root /opt/observium/discovery.php -h all >> /var/log/obs_cron_discovery.log
+*/5 * * * * root /opt/observium/discovery.php -h new >> /var/log/obs_cron_discovery.log
+*/5 * * * * root /opt/observium/poller-wrapper.py 2 >> /var/log/obs_cron_poller.log
 EOF
 if [ $? -ne 0 ]; then
 	errors="$errors \n- At line $LINENO: Creating CRON jobs failed."
